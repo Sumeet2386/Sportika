@@ -78,27 +78,7 @@ const GENDER_CATS = [
   { label: 'ACCESSORIES', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80', to: '/products?sub=accessories', bg: '#F0F0F8' },
 ];
 
-/* ─── Fabric Technologies ─── */
-const FABRICS = [
-  { icon: '❄️', name: 'CoolTech+', desc: 'Fabric tech that keeps you cool even in the toughest conditions.', to: '/products' },
-  { icon: '🛡️', name: 'DuraFlex', desc: 'Rugged, lightweight fabric built for relentless movement.', to: '/products' },
-  { icon: '🌿', name: 'CotFlex', desc: 'Feels like cotton, lasts like a champion.', to: '/products' },
-  { icon: '☁️', name: 'CloudFlex', desc: 'Ultra-light fabric built for seamless movement.', to: '/products' },
-  { icon: '❄️', name: 'DoubleCool', desc: 'Twice the cooling, twice the comfort.', to: '/products' },
-  { icon: '💪', name: 'DuraCool+', desc: 'Durable fabric that also stays cool all day.', to: '/products' },
-];
 
-/* ─── Sub Categories ─── */
-const SUB_CATS = [
-  { name: 'T-Shirts', icon: '👕', to: '/products?sub=tshirts' },
-  { name: 'Shorts', icon: '🩳', to: '/products?sub=shorts' },
-  { name: 'Jackets', icon: '🧥', to: '/products?sub=jackets' },
-  { name: 'Track Pants', icon: '👖', to: '/products?sub=track-pants' },
-  { name: 'Shoes', icon: '👟', to: '/products?sub=shoes' },
-  { name: 'Accessories', icon: '🎒', to: '/products?sub=accessories' },
-  { name: 'Innerwear', icon: '🩲', to: '/products' },
-  { name: 'Co-ord Sets', icon: '🎽', to: '/products' },
-];
 
 export default function HomePage() {
   const [slide, setSlide] = useState(0);
@@ -415,85 +395,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          NEW LAUNCHES — Promo + Products
-      ══════════════════════════════════════════════ */}
-      <section style={{ background: 'white', padding: '0 0 64px' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #E8EEF8 0%, #D0DBFF 100%)',
-          padding: '24px 0',
-          marginBottom: 40,
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{
-                background: '#FF6B35', color: 'white',
-                fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.72rem',
-                padding: '6px 12px', borderRadius: 50, letterSpacing: '0.06em',
-                display: 'flex', alignItems: 'center', gap: 5,
-              }}>
-                <Zap size={11} fill="white" /> NEW ARRIVAL
-              </div>
-              <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 'clamp(1.75rem, 4vw, 3rem)', color: '#1B1F3B', textTransform: 'uppercase', letterSpacing: '-0.01em' }}>
-                OUR NEW LAUNCHES
-              </h2>
-            </div>
-            <Link to="/products?filter=new" style={{
-              background: '#1B1F3B', color: 'white',
-              fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.9rem',
-              padding: '12px 28px', borderRadius: 50, textDecoration: 'none',
-              display: 'flex', alignItems: 'center', gap: 8,
-              transition: 'all 0.2s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = '#252A4A'}
-              onMouseLeave={e => e.currentTarget.style.background = '#1B1F3B'}
-            >
-              View All <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-
-        <div className="container">
-          <div className="products-grid">
-            {newArrivals.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          SHOP BY CATEGORY — Sub-cat pills
-      ══════════════════════════════════════════════ */}
-      <section style={{ background: '#F5F6FA', padding: '56px 0' }}>
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-            <h2 className="section-title h2" style={{ margin: 0 }}>Shop by Category</h2>
-            <Link to="/products" className="btn btn-outline">View All <ChevronRight size={15} /></Link>
-          </div>
-
-          {/* Filter tabs */}
-          <div className="filter-tabs" style={{ marginBottom: 28 }}>
-            {(['Men', 'Women', 'Kids', 'Shoes & Accessories'] as const).map((tab, i) => {
-              const keys = ['men', 'women', 'kids', 'accessories'];
-              return (
-                <Link key={tab} to={`/products${i < 2 ? `?category=${keys[i]}` : i === 3 ? '?sub=accessories' : ''}`}>
-                  <button className={`filter-tab ${i === 0 ? 'active' : ''}`}>{tab}</button>
-                </Link>
-              );
-            })}
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 12 }}>
-            {SUB_CATS.map(cat => (
-              <Link key={cat.to} to={cat.to} className="sub-cat-pill">
-                <span className="sub-cat-pill-icon">{cat.icon}</span>
-                <span className="sub-cat-pill-name">{cat.name}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ══════════════════════════════════════════════
           FLASH SALE
@@ -574,45 +475,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          SHOP BY FABRIC — Technology Section
-      ══════════════════════════════════════════════ */}
-      <section className="fabric-section">
-        <div className="fabric-section-bg-text">FABRICS</div>
-        <div className="container">
-          <h2 className="section-title h1" style={{ textAlign: 'center', marginBottom: 48, fontSize: 'clamp(1.75rem, 4vw, 3rem)', textTransform: 'uppercase', letterSpacing: '-0.01em', fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic' }}>
-            SHOP BY FABRIC
-          </h2>
-
-          <div className="fabric-grid">
-            {FABRICS.map(fab => (
-              <Link key={fab.name} to={fab.to} className="fabric-card" style={{ textDecoration: 'none' }}>
-                <div className="fabric-card-icon">{fab.icon}</div>
-                <div>
-                  <div className="fabric-card-title">{fab.name}</div>
-                  <div className="fabric-card-desc">{fab.desc}</div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: 40 }}>
-            <Link to="/products" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 10,
-              background: '#1B1F3B', color: 'white',
-              fontFamily: 'Outfit', fontWeight: 700, fontSize: '1rem',
-              padding: '14px 40px', borderRadius: 50, textDecoration: 'none',
-              boxShadow: '0 8px 28px rgba(27,31,59,0.35)',
-              transition: 'all 0.2s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(27,31,59,0.45)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(27,31,59,0.35)'; }}
-            >
-              View All
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* ══════════════════════════════════════════════
           WHY SPORTIKA
