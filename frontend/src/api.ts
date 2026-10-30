@@ -105,6 +105,20 @@ export const authAPI = {
       body: JSON.stringify({ email, code }),
     });
   },
+
+  forgotPassword: async (email: string) => {
+    return apiFetch('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (data: { email: string; code: string; newPassword: string }) => {
+    return apiFetch('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 // ── Orders API ──

@@ -152,6 +152,101 @@ router.post('/verify-otp', (req: Request, res: Response) => {
   });
 });
 
+// ── POST /api/auth/forgot-password ──
+router.post('/forgot-password',
+  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: errors.array()[0].msg });
+    }
+
+    const { email } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
+
+    try {
+      const user = db.prepare('SELECT id, name, email FROM users WHERE email = ?').get(cleanEmail) as any;
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'No account found with this email address. Please register.'
+        });
+      }
+
+      const code = generateOtp(cleanEmail);
+      console.log(`🔐 [Password Reset OTP for ${cleanEmail}]: ${code}`);
+
+      return res.json({
+        success: true,
+        message: `A 6-digit password reset code has been sent to ${cleanEmail}`,
+        code, // Provided for instant testing preview
+      });
+    } catch (err: any) {
+      console.error('Forgot password error:', err);
+      return res.status(500).json({ success: false, message: 'Could not process password reset request.' });
+    }
+  }
+);
+
+// ── POST /api/auth/reset-password ──
+router.post('/reset-password',
+  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+  body('code').notEmpty().withMessage('Reset code is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: errors.array()[0].msg });
+    }
+
+    const { email, code, newPassword } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
+
+    try {
+      const stored = otpStore.get(cleanEmail);
+      if (!stored) {
+        return res.status(400).json({ success: false, message: 'Reset code expired or not requested. Please request a new code.' });
+      }
+
+      if (Date.now() > stored.expiresAt) {
+        otpStore.delete(cleanEmail);
+        return res.status(400).json({ success: false, message: 'Reset code has expired. Please request a new code.' });
+      }
+
+      if (stored.code !== code.trim()) {
+        return res.status(400).json({ success: false, message: 'Invalid verification code. Please check and try again.' });
+      }
+
+      const user = db.prepare('SELECT id, name, email, phone, avatar, role FROM users WHERE email = ?').get(cleanEmail) as any;
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+      db.prepare('UPDATE users SET password_hash = ?, email_verified = 1, updated_at = ? WHERE email = ?')
+        .run(passwordHash, new Date().toISOString(), cleanEmail);
+
+      otpStore.delete(cleanEmail);
+
+      const addresses = getAddresses(user.id);
+      const { token, refreshToken } = generateTokens(user.id, user.email, user.role);
+
+      return res.json({
+        success: true,
+        message: 'Password reset successful! Logging you in...',
+        data: {
+          user: { ...user, addresses, email_verified: 1 },
+          token,
+          refreshToken,
+        },
+      });
+    } catch (err: any) {
+      console.error('Reset password error:', err);
+      return res.status(500).json({ success: false, message: 'Failed to reset password.' });
+    }
+  }
+);
+
 // ── POST /api/auth/register ──
 router.post('/register',
   body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }),

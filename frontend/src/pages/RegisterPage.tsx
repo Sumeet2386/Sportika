@@ -136,22 +136,32 @@ export default function RegisterPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0D1117 0%, #0D47A1 50%, #FF6F00 100%)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24
+      background: 'linear-gradient(135deg, #0A0D14 0%, #10192A 40%, #162038 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px',
+      position: 'relative',
     }}>
       <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', maxWidth: 920, width: '100%',
-        background: 'white', borderRadius: 28, overflow: 'hidden',
-        boxShadow: '0 25px 80px rgba(0,0,0,0.4)'
+        position: 'absolute', top: '20%', right: '15%', width: 380, height: 380, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0) 70%)',
+        filter: 'blur(40px)', pointerEvents: 'none',
+      }} />
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'minmax(320px, 400px) minmax(360px, 480px)', maxWidth: 920, width: '100%',
+        background: 'white', borderRadius: 24, overflow: 'hidden',
+        boxShadow: '0 30px 90px rgba(0,0,0,0.5)', position: 'relative', zIndex: 1,
       }}>
         {/* ── Left Panel ── */}
         <div style={{
-          background: 'linear-gradient(160deg, #0D47A1, #FF6F00 130%)',
-          padding: 48, display: 'flex', flexDirection: 'column', justifyContent: 'center', color: 'white'
+          background: 'linear-gradient(160deg, #101828 0%, #0F203C 50%, #1B294B 100%)',
+          padding: '48px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', color: 'white',
+          borderRight: '1px solid rgba(255,255,255,0.08)',
         }}>
-          <Link to="/" style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.5rem', color: 'white', marginBottom: 48 }}>
-            SPORTI<span style={{ color: '#FFD700' }}>KA</span>
-          </Link>
+          <div>
+            <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginBottom: 44 }}>
+              <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: '2rem', fontStyle: 'italic', letterSpacing: '0.04em', color: 'white' }}>
+                SPORTI<span style={{ color: '#FF6B35' }}>KA</span>
+              </span>
+            </Link>
           <h2 style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '2rem', marginBottom: 16, lineHeight: 1.2 }}>
             Join the Sportika Family!
           </h2>
@@ -172,6 +182,7 @@ export default function RegisterPage() {
               <CheckCircle size={14} style={{ flexShrink: 0 }} /> {item}
             </div>
           ))}
+          </div>
 
           {/* Database status */}
           {apiOnline !== null && (
