@@ -62,13 +62,16 @@ export default function RegisterPage() {
       }) as any;
 
       if (result.success) {
+        if (result.data?.user && result.data?.token) {
+          login(result.data.user, result.data.token);
+        }
         setPendingUser(result.data?.user || null);
         setPendingToken(result.data?.token || '');
         const code = result.otp || '';
         setDemoOtp(code);
         setVerifyOtpInput(code); // Pre-fill for instant seamless testing
         setIsVerificationModalOpen(true);
-        addNotification('info', `Verification code sent to ${form.email}`);
+        addNotification('success', `Welcome to Sportika, ${form.name.split(' ')[0]}! Account created successfully. 🎉`);
       } else {
         setError(result.message || 'Registration failed. Please try again.');
       }
@@ -232,12 +235,33 @@ export default function RegisterPage() {
 
           {error && (
             <div style={{
-              background: '#FFF5F5', border: '1px solid #FCA5A5', borderRadius: 10,
+              background: '#FFF5F5', border: '1px solid #FCA5A5', borderRadius: 12,
               padding: '12px 16px', marginBottom: 18, color: '#E74C3C', fontSize: '0.875rem',
-              display: 'flex', alignItems: 'center', gap: 8
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10
             }}>
-              <AlertCircle size={16} style={{ flexShrink: 0 }} />
-              {error}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                <span>{error}</span>
+              </div>
+              {error.toLowerCase().includes('already exists') && (
+                <Link
+                  to="/login"
+                  state={{ prefillEmail: form.email }}
+                  style={{
+                    background: '#E74C3C',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  Sign In →
+                </Link>
+              )}
             </div>
           )}
 
@@ -407,7 +431,10 @@ export default function RegisterPage() {
             >
               <button
                 type="button"
-                onClick={() => setIsVerificationModalOpen(false)}
+                onClick={() => {
+                  setIsVerificationModalOpen(false);
+                  navigate('/');
+                }}
                 style={{
                   position: 'absolute',
                   right: 18,
@@ -591,6 +618,35 @@ export default function RegisterPage() {
                       Verify & Activate Account
                     </>
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsVerificationModalOpen(false);
+                    navigate('/');
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '11px',
+                    borderRadius: 12,
+                    background: '#F1F5F9',
+                    color: '#475569',
+                    border: 'none',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    marginTop: 10,
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#E2E8F0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#F1F5F9';
+                  }}
+                >
+                  Skip for now & Start Shopping →
                 </button>
               </form>
 
