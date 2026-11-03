@@ -1308,27 +1308,28 @@ export default function LoginPage() {
             }}
           >
             <div style={{ color: '#64748B' }}>
-              <strong>Admin Portal?</strong> admin@sportika.in
+              <strong>Admin Portal:</strong> sumeetgite23@gmail.com
             </div>
             <button
               type="button"
               onClick={() => {
                 switchTab('login');
-                setLoginEmail('admin@sportika.in');
+                setLoginEmail('sumeetgite23@gmail.com');
                 setLoginPassword('Admin@Sportika2024');
               }}
               style={{
-                background: 'none',
-                border: '1px solid #CBD5E1',
+                background: '#FF6B35',
+                border: 'none',
                 borderRadius: 6,
-                padding: '4px 10px',
+                padding: '5px 12px',
                 fontSize: '0.74rem',
                 fontWeight: 700,
-                color: '#FF6B35',
+                color: '#FFFFFF',
                 cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(255,107,53,0.3)',
               }}
             >
-              Fill Admin
+              Fill Admin Sumeet
             </button>
           </div>
         </div>

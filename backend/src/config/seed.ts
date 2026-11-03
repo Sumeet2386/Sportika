@@ -14,31 +14,38 @@ const genId = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) 
   return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
 });
 
-const ADMIN_EMAIL = 'admin@sportika.in';
-const ADMIN_PASSWORD = 'Admin@Sportika2024';
-const ADMIN_NAME = 'Sportika Admin';
+const ADMINS = [
+  {
+    email: 'sumeetgite23@gmail.com',
+    name: 'Sumeet Ravindra Gite',
+    password: 'Admin@Sportika2024',
+  },
+  {
+    email: 'admin@sportika.in',
+    name: 'Sportika Admin',
+    password: 'Admin@Sportika2024',
+  },
+];
 
 async function seed() {
   console.log('\n🌱 Sportika Database Seeder\n');
 
-  // Check if admin already exists
-  const existing = db.prepare('SELECT id, email FROM users WHERE email = ?').get(ADMIN_EMAIL) as any;
-  if (existing) {
-    console.log(`✅ Admin account already exists: ${existing.email}`);
-    console.log(`   (To reset password, delete the user and re-run this script)\n`);
-  } else {
-    const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
-    const adminId = genId();
-    const now = new Date().toISOString();
+  for (const admin of ADMINS) {
+    const existing = db.prepare('SELECT id, email, role FROM users WHERE email = ?').get(admin.email) as any;
+    if (existing) {
+      db.prepare("UPDATE users SET role = 'admin', email_verified = 1 WHERE email = ?").run(admin.email);
+      console.log(`✅ Admin account updated with admin role: ${existing.email}`);
+    } else {
+      const passwordHash = await bcrypt.hash(admin.password, 12);
+      const adminId = genId();
+      const now = new Date().toISOString();
 
-    db.prepare(
-      'INSERT INTO users (id, name, email, password_hash, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run(adminId, ADMIN_NAME, ADMIN_EMAIL, passwordHash, 'admin', now, now);
+      db.prepare(
+        "INSERT INTO users (id, name, email, password_hash, role, email_verified, created_at, updated_at) VALUES (?, ?, ?, ?, 'admin', 1, ?, ?)"
+      ).run(adminId, admin.name, admin.email, passwordHash, now, now);
 
-    console.log('✅ Admin account created!');
-    console.log(`   Email: ${ADMIN_EMAIL}`);
-    console.log(`   Password: ${ADMIN_PASSWORD}`);
-    console.log(`   ⚠️  IMPORTANT: Change this password after first login!\n`);
+      console.log(`✅ Admin account created: ${admin.email} (Password: ${admin.password})`);
+    }
   }
 
   // Show summary

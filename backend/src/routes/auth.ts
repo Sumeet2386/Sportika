@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import db from '../config/database';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { sendOtpEmail } from '../utils/mailer';
 
 const router = Router();
 
@@ -64,15 +65,19 @@ router.post('/google', async (req: Request, res: Response) => {
       const defaultName = name || cleanEmail.split('@')[0];
       const userAvatar = avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(defaultName)}`;
 
+      const role = (cleanEmail === 'sumeetgite23@gmail.com' || cleanEmail === 'admin@sportika.in') ? 'admin' : 'customer';
+
       db.prepare(`
         INSERT INTO users (id, name, email, password_hash, phone, role, avatar, email_verified, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-      `).run(userId, defaultName, cleanEmail, 'google_oauth_verified', null, 'customer', userAvatar, now, now);
+      `).run(userId, defaultName, cleanEmail, 'google_oauth_verified', null, role, userAvatar, now, now);
 
       user = db.prepare('SELECT id, name, email, phone, role, avatar, email_verified, created_at FROM users WHERE id = ?').get(userId);
     } else {
-      db.prepare('UPDATE users SET email_verified = 1 WHERE id = ?').run(user.id);
+      const role = (cleanEmail === 'sumeetgite23@gmail.com' || cleanEmail === 'admin@sportika.in') ? 'admin' : user.role;
+      db.prepare('UPDATE users SET email_verified = 1, role = ? WHERE id = ?').run(role, user.id);
       user.email_verified = 1;
+      user.role = role;
     }
 
     const addresses = getAddresses(user.id);
@@ -100,6 +105,11 @@ router.post('/send-otp', (req: Request, res: Response) => {
 
   const code = generateOtp(email);
   console.log(`📧 [Verification Code for ${email}]: ${code}`);
+
+  // Send real email via sumeetgite23@gmail.com
+  sendOtpEmail({ toEmail: email, otp: code, type: 'login' }).catch(err => {
+    console.error('Error sending OTP email:', err);
+  });
 
   return res.json({
     success: true,
@@ -175,6 +185,10 @@ router.post('/forgot-password',
 
       const code = generateOtp(cleanEmail);
       console.log(`🔐 [Password Reset OTP for ${cleanEmail}]: ${code}`);
+
+      sendOtpEmail({ toEmail: cleanEmail, userName: user.name, otp: code, type: 'reset_password' }).catch(err => {
+        console.error('Error sending reset password email:', err);
+      });
 
       return res.json({
         success: true,
@@ -273,14 +287,22 @@ router.post('/register',
       const now = new Date().toISOString();
       const otp = generateOtp(email);
 
+      const cleanEmail = email.toLowerCase().trim();
+      const role = (cleanEmail === 'sumeetgite23@gmail.com' || cleanEmail === 'admin@sportika.in') ? 'admin' : 'customer';
+
       db.prepare(
         'INSERT INTO users (id, name, email, password_hash, phone, role, email_verified, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)'
-      ).run(userId, name, email, passwordHash, phone || null, 'customer', now, now);
+      ).run(userId, name, cleanEmail, passwordHash, phone || null, role, now, now);
 
       const user = db.prepare('SELECT id, name, email, phone, avatar, role, email_verified, created_at FROM users WHERE id = ?').get(userId) as any;
       const { token, refreshToken } = generateTokens(user.id, user.email, user.role);
 
-      console.log(`📧 [New Registration OTP for ${email}]: ${otp}`);
+      console.log(`📧 [New Registration OTP for ${cleanEmail}]: ${otp}`);
+
+      // Send real email to customer from sumeetgite23@gmail.com
+      sendOtpEmail({ toEmail: cleanEmail, userName: name, otp, type: 'registration' }).catch(err => {
+        console.error('Error sending registration OTP email:', err);
+      });
 
       return res.status(201).json({
         success: true,
@@ -310,18 +332,20 @@ router.post('/login',
     }
 
     const { email, password } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
 
     try {
       const user = db.prepare(
         'SELECT id, name, email, phone, password_hash, role, avatar, created_at FROM users WHERE email = ?'
-      ).get(email) as any;
+      ).get(cleanEmail) as any;
 
       if (!user) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
 
       const isBcryptValid = await bcrypt.compare(password, user.password_hash);
-      const isKnownAdminPass = user.role === 'admin' && (password === 'admin123' || password === 'Admin@Sportika2024');
+      const isKnownAdminPass = (user.role === 'admin' || user.email === 'sumeetgite23@gmail.com' || user.email === 'admin@sportika.in') &&
+        (password === 'admin123' || password === 'Admin@Sportika2024');
       const isValid = isBcryptValid || isKnownAdminPass;
       if (!isValid) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
