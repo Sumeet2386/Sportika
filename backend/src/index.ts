@@ -19,7 +19,23 @@ import userRoutes from './routes/users';
 import couponRoutes from './routes/coupons';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+
+// ── Production Secrets Validation ──
+if (process.env.NODE_ENV === 'production') {
+  const jwtSecret = process.env.JWT_SECRET;
+  const placeholderSecrets = [
+    'sportika_super_secret_jwt_key_2024_change_in_production',
+    'sportika_secret_2024',
+    'placeholder',
+    'your_jwt_secret',
+    'secret',
+  ];
+  if (!jwtSecret || placeholderSecrets.includes(jwtSecret) || jwtSecret.length < 32) {
+    console.error('❌ FATAL: JWT_SECRET must be set to a secure, unique secret (minimum 32 characters) in production.');
+    process.exit(1);
+  }
+}
 
 // ── Security Middleware ──
 app.use(helmet({
