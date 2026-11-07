@@ -224,54 +224,14 @@ export const authAPI = {
   },
 
   googleAuth: async (data: { email: string; name?: string; avatar?: string }) => {
-    const cleanEmail = data.email.trim().toLowerCase();
-    const name = data.name || cleanEmail.split('@')[0];
-    const avatar = data.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
-
-    // 1. Try Backend
     try {
-      const res = await apiFetch<any>('/auth/google', {
+      return await apiFetch<any>('/auth/google', {
         method: 'POST',
-        body: JSON.stringify({ email: cleanEmail, name, avatar }),
+        body: JSON.stringify(data),
       });
-      if (res && res.success) return res;
-    } catch (backendErr: any) {
-      console.warn('Backend Google auth fallback:', backendErr.message);
+    } catch (err: any) {
+      throw new Error(err.message || 'Google sign-in is temporarily unavailable');
     }
-
-    // 2. Resilient Client Fallback
-    const users = getStoredUsers();
-    let user = users.find((u) => u.email === cleanEmail);
-    const isAdmin = cleanEmail === 'sumeetgite23@gmail.com' || cleanEmail === 'admin@sportika.in';
-
-    if (!user) {
-      user = {
-        id: `google_${Date.now()}`,
-        name,
-        email: cleanEmail,
-        role: isAdmin ? 'admin' : 'customer',
-        avatar,
-        email_verified: 1,
-        created_at: new Date().toISOString(),
-        addresses: [],
-      };
-      users.push(user);
-      saveStoredUsers(users);
-    } else if (isAdmin && user.role !== 'admin') {
-      user.role = 'admin';
-      saveStoredUsers(users);
-    }
-
-    const { password: _, ...safeUser } = user;
-    return {
-      success: true,
-      message: `Signed in with Google as ${name}! 🚀`,
-      data: {
-        user: safeUser,
-        token: `jwt_google_${user.id}`,
-        refreshToken: `jwt_google_refresh_${user.id}`,
-      },
-    };
   },
 
   sendOtp: async (email: string) => {

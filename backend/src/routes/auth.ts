@@ -48,54 +48,14 @@ const generateOtp = (email: string): string => {
   return code;
 };
 
-// ── POST /api/auth/google ── (Direct Google Sign In & Sign Up)
-router.post('/google', async (req: Request, res: Response) => {
-  try {
-    const { email, name, avatar } = req.body;
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Google account email is required' });
-    }
-
-    const cleanEmail = email.toLowerCase().trim();
-    let user = db.prepare('SELECT id, name, email, phone, role, avatar, email_verified, created_at FROM users WHERE email = ?').get(cleanEmail) as any;
-
-    if (!user) {
-      const userId = genId();
-      const now = new Date().toISOString();
-      const defaultName = name || cleanEmail.split('@')[0];
-      const userAvatar = avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(defaultName)}`;
-
-      const role = (cleanEmail === 'sumeetgite23@gmail.com' || cleanEmail === 'admin@sportika.in') ? 'admin' : 'customer';
-
-      db.prepare(`
-        INSERT INTO users (id, name, email, password_hash, phone, role, avatar, email_verified, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-      `).run(userId, defaultName, cleanEmail, 'google_oauth_verified', null, role, userAvatar, now, now);
-
-      user = db.prepare('SELECT id, name, email, phone, role, avatar, email_verified, created_at FROM users WHERE id = ?').get(userId);
-    } else {
-      const role = (cleanEmail === 'sumeetgite23@gmail.com' || cleanEmail === 'admin@sportika.in') ? 'admin' : user.role;
-      db.prepare('UPDATE users SET email_verified = 1, role = ? WHERE id = ?').run(role, user.id);
-      user.email_verified = 1;
-      user.role = role;
-    }
-
-    const addresses = getAddresses(user.id);
-    const { token, refreshToken } = generateTokens(user.id, user.email, user.role);
-
-    return res.json({
-      success: true,
-      message: `Signed in with Google as ${user.name}! 🚀`,
-      data: {
-        user: { ...user, addresses },
-        token,
-        refreshToken,
-      },
-    });
-  } catch (err: any) {
-    console.error('Google auth error:', err);
-    return res.status(500).json({ success: false, message: 'Google authentication failed' });
-  }
+// ── POST /api/auth/google ── (Disabled - pending Google OAuth id_token verification)
+router.post('/google', async (_req: Request, res: Response) => {
+  // TODO (Phase 3): Implement proper Google OAuth 2.0 id_token verification using google-auth-library
+  // to securely verify client identity tokens on the server rather than trusting arbitrary payload parameters.
+  return res.status(501).json({
+    success: false,
+    message: 'Google sign-in is temporarily unavailable',
+  });
 });
 
 // ── POST /api/auth/send-otp ── (Send email verification OTP)
