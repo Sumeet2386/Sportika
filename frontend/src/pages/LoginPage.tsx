@@ -1315,7 +1315,6 @@ export default function LoginPage() {
               onClick={() => {
                 switchTab('login');
                 setLoginEmail('sumeetgite23@gmail.com');
-                setLoginPassword('Admin@Sportika2024');
               }}
               style={{
                 background: '#FF6B35',

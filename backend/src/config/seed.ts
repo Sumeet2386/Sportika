@@ -14,16 +14,17 @@ const genId = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) 
   return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
 });
 
+const adminPassword = process.env.ADMIN_PASSWORD;
+if (!adminPassword) {
+  console.error('❌ Cannot seed admin: ADMIN_PASSWORD environment variable is required.');
+  process.exit(1);
+}
+
 const ADMINS = [
   {
-    email: 'sumeetgite23@gmail.com',
-    name: 'Sumeet Ravindra Gite',
-    password: 'Admin@Sportika2024',
-  },
-  {
-    email: 'admin@sportika.in',
-    name: 'Sportika Admin',
-    password: 'Admin@Sportika2024',
+    email: (process.env.ADMIN_EMAIL || 'admin@sportika.in').toLowerCase().trim(),
+    name: process.env.ADMIN_NAME || 'Sportika Admin',
+    password: adminPassword,
   },
 ];
 
@@ -44,7 +45,7 @@ async function seed() {
         "INSERT INTO users (id, name, email, password_hash, role, email_verified, created_at, updated_at) VALUES (?, ?, ?, ?, 'admin', 1, ?, ?)"
       ).run(adminId, admin.name, admin.email, passwordHash, now, now);
 
-      console.log(`✅ Admin account created: ${admin.email} (Password: ${admin.password})`);
+      console.log(`✅ Admin account created: ${admin.email}`);
     }
   }
 

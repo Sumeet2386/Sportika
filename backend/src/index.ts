@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import dotenv from 'dotenv';
+import { bootstrapAdmin } from './config/bootstrap';
 
 dotenv.config();
 
@@ -92,10 +93,11 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // ── Start Server ──
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`\n🚀 Sportika API Server running on port ${PORT}`);
   console.log(`📌 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health: http://localhost:${PORT}/api/health\n`);
+  await bootstrapAdmin();
 });
 
 export default app;

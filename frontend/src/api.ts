@@ -30,61 +30,11 @@ const getStoredUsers = (): StoredUser[] => {
   try {
     const raw = localStorage.getItem('sportika_registered_users');
     if (!raw) {
-      const initial: StoredUser[] = [
-        {
-          id: 'admin_sumeet_root',
-          name: 'Sumeet Ravindra Gite',
-          email: 'sumeetgite23@gmail.com',
-          password: 'Admin@Sportika2024',
-          role: 'admin',
-          avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Sumeet+Gite',
-          email_verified: 1,
-          created_at: new Date().toISOString(),
-          addresses: [],
-        },
-        {
-          id: 'admin_sportika_root',
-          name: 'Sportika Admin',
-          email: 'admin@sportika.in',
-          password: 'Admin@Sportika2024',
-          role: 'admin',
-          email_verified: 1,
-          created_at: new Date().toISOString(),
-          addresses: [],
-        },
-        {
-          id: 'demo_user_test',
-          name: 'Demo Athlete',
-          email: 'any@email.com',
-          password: 'password123',
-          role: 'customer',
-          email_verified: 1,
-          created_at: new Date().toISOString(),
-          addresses: [],
-        },
-      ];
+      const initial: StoredUser[] = [];
       localStorage.setItem('sportika_registered_users', JSON.stringify(initial));
       return initial;
     }
     const list: StoredUser[] = JSON.parse(raw);
-    const sumeet = list.find((u) => u.email === 'sumeetgite23@gmail.com');
-    if (!sumeet) {
-      list.unshift({
-        id: 'admin_sumeet_root',
-        name: 'Sumeet Ravindra Gite',
-        email: 'sumeetgite23@gmail.com',
-        password: 'Admin@Sportika2024',
-        role: 'admin',
-        avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Sumeet+Gite',
-        email_verified: 1,
-        created_at: new Date().toISOString(),
-        addresses: [],
-      });
-      localStorage.setItem('sportika_registered_users', JSON.stringify(list));
-    } else if (sumeet.role !== 'admin') {
-      sumeet.role = 'admin';
-      localStorage.setItem('sportika_registered_users', JSON.stringify(list));
-    }
     return list;
   } catch {
     return [];
@@ -253,32 +203,6 @@ export const authAPI = {
     }
 
     // 2. Resilient Client Fallback
-    // Check Admin accounts
-    if (
-      (cleanEmail === 'sumeetgite23@gmail.com' || cleanEmail === 'admin@sportika.in') &&
-      (data.password === 'admin123' || data.password === 'Admin@Sportika2024')
-    ) {
-      const adminUser: StoredUser = {
-        id: cleanEmail === 'sumeetgite23@gmail.com' ? 'admin_sumeet_root' : 'admin_root',
-        name: cleanEmail === 'sumeetgite23@gmail.com' ? 'Sumeet Ravindra Gite' : 'Sportika Admin',
-        email: cleanEmail,
-        role: 'admin',
-        avatar: cleanEmail === 'sumeetgite23@gmail.com' ? 'https://api.dicebear.com/7.x/initials/svg?seed=Sumeet+Gite' : undefined,
-        email_verified: 1,
-        created_at: new Date().toISOString(),
-        addresses: [],
-      };
-      return {
-        success: true,
-        message: 'Admin login successful! Welcome back, Admin.',
-        data: {
-          user: adminUser,
-          token: 'jwt_admin_token',
-          refreshToken: 'jwt_admin_refresh',
-        },
-      };
-    }
-
     // Check Local Registered Users
     const users = getStoredUsers();
     const user = users.find((u) => u.email === cleanEmail);

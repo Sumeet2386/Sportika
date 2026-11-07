@@ -112,12 +112,10 @@ npm run db:migrate
 
 ---
 
-## 🔐 Demo Credentials
+## 🔐 Admin & Customer Setup
 
-| Role | Email | Password |
-|------|-------|----------|
-| Customer | any@email.com | 123456 (6+ chars) |
-| Admin | admin@sportika.in | admin123 |
+Admin credentials are configured securely via environment variables (`ADMIN_EMAIL` and `ADMIN_PASSWORD` in `backend/.env`).
+Customer accounts can be registered through the sign-up page or authenticated with email verification.
 
 ---
 

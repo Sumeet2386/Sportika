@@ -343,10 +343,7 @@ router.post('/login',
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
 
-      const isBcryptValid = await bcrypt.compare(password, user.password_hash);
-      const isKnownAdminPass = (user.role === 'admin' || user.email === 'sumeetgite23@gmail.com' || user.email === 'admin@sportika.in') &&
-        (password === 'admin123' || password === 'Admin@Sportika2024');
-      const isValid = isBcryptValid || isKnownAdminPass;
+      const isValid = await bcrypt.compare(password, user.password_hash);
       if (!isValid) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
