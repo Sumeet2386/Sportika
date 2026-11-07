@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle, AlertCircle,
-  Database, ShieldCheck, ArrowRight, RefreshCw, X, KeyRound, Sparkles
+  Database, ShieldCheck, ArrowRight, RefreshCw, X, Sparkles
 } from 'lucide-react';
 import { useAuthStore, useUIStore } from '../store';
 import { authAPI, checkAPIHealth } from '../api';
@@ -18,7 +18,6 @@ export default function RegisterPage() {
   // Email Verification State
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [verifyOtpInput, setVerifyOtpInput] = useState('');
-  const [demoOtp, setDemoOtp] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState('');
   const [resending, setResending] = useState(false);
@@ -67,9 +66,7 @@ export default function RegisterPage() {
         }
         setPendingUser(result.data?.user || null);
         setPendingToken(result.data?.token || '');
-        const code = result.otp || '';
-        setDemoOtp(code);
-        setVerifyOtpInput(code); // Pre-fill for instant seamless testing
+        setVerifyOtpInput('');
         setIsVerificationModalOpen(true);
         addNotification('success', `Welcome to Sportika, ${form.name.split(' ')[0]}! Account created successfully. 🎉`);
       } else {
@@ -119,8 +116,6 @@ export default function RegisterPage() {
     try {
       const res = await authAPI.sendOtp(form.email.trim().toLowerCase()) as any;
       if (res.success) {
-        setDemoOtp(res.code || '');
-        setVerifyOtpInput(res.code || '');
         addNotification('success', 'A new verification code has been sent!');
       } else {
         setVerifyError(res.message || 'Failed to resend code.');
@@ -494,46 +489,6 @@ export default function RegisterPage() {
 
             {/* Modal Body */}
             <div style={{ padding: '26px 28px 28px' }}>
-              {/* Demo Helper Banner */}
-              {demoOtp && (
-                <div
-                  style={{
-                    background: '#EFF6FF',
-                    border: '1.5px dashed #3B82F6',
-                    borderRadius: 12,
-                    padding: '12px 16px',
-                    marginBottom: 20,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <KeyRound size={20} color="#2563EB" />
-                    <div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1E40AF' }}>
-                        Verification Code Sent:
-                      </div>
-                      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1D4ED8', letterSpacing: '3px' }}>
-                        {demoOtp}
-                      </div>
-                    </div>
-                  </div>
-                  <span
-                    style={{
-                      background: '#DBEAFE',
-                      color: '#1E40AF',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      padding: '4px 8px',
-                      borderRadius: 6,
-                    }}
-                  >
-                    Auto-Filled
-                  </span>
-                </div>
-              )}
-
               {verifyError && (
                 <div
                   style={{

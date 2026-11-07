@@ -153,7 +153,9 @@ export async function sendOtpEmail({
     console.log(`From: Sportika <${ADMIN_EMAIL}>`);
     console.log(`To: ${toEmail}`);
     console.log(`Subject: ${title}`);
-    console.log(`OTP Code: [ ${otp} ]`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.info(`[DEV ONLY] OTP Code: [ ${otp} ]`);
+    }
     console.log(`Tip: Add SMTP_PASS (Gmail 16-character App Password) in backend/.env to send real emails to inbox.\n`);
     return { success: true, simulated: true };
   }

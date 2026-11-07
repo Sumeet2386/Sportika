@@ -64,9 +64,11 @@ router.post('/send-otp', (req: Request, res: Response) => {
   if (!email) return res.status(400).json({ success: false, message: 'Email address is required' });
 
   const code = generateOtp(email);
-  console.log(`📧 [Verification Code for ${email}]: ${code}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.info(`[DEV ONLY] Verification OTP for ${email}: ${code}`);
+  }
 
-  // Send real email via sumeetgite23@gmail.com
+  // Send real email via configured SMTP
   sendOtpEmail({ toEmail: email, otp: code, type: 'login' }).catch(err => {
     console.error('Error sending OTP email:', err);
   });
@@ -74,7 +76,6 @@ router.post('/send-otp', (req: Request, res: Response) => {
   return res.json({
     success: true,
     message: `Verification code sent to ${email}`,
-    code, // Included for instant test preview
   });
 });
 
@@ -144,7 +145,9 @@ router.post('/forgot-password',
       }
 
       const code = generateOtp(cleanEmail);
-      console.log(`🔐 [Password Reset OTP for ${cleanEmail}]: ${code}`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.info(`[DEV ONLY] Password Reset OTP for ${cleanEmail}: ${code}`);
+      }
 
       sendOtpEmail({ toEmail: cleanEmail, userName: user.name, otp: code, type: 'reset_password' }).catch(err => {
         console.error('Error sending reset password email:', err);
@@ -153,7 +156,6 @@ router.post('/forgot-password',
       return res.json({
         success: true,
         message: `A 6-digit password reset code has been sent to ${cleanEmail}`,
-        code, // Provided for instant testing preview
       });
     } catch (err: any) {
       console.error('Forgot password error:', err);
@@ -257,9 +259,11 @@ router.post('/register',
       const user = db.prepare('SELECT id, name, email, phone, avatar, role, email_verified, created_at FROM users WHERE id = ?').get(userId) as any;
       const { token, refreshToken } = generateTokens(user.id, user.email, user.role);
 
-      console.log(`📧 [New Registration OTP for ${cleanEmail}]: ${otp}`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.info(`[DEV ONLY] New Registration OTP for ${cleanEmail}: ${otp}`);
+      }
 
-      // Send real email to customer from sumeetgite23@gmail.com
+      // Send real email to customer
       sendOtpEmail({ toEmail: cleanEmail, userName: name, otp, type: 'registration' }).catch(err => {
         console.error('Error sending registration OTP email:', err);
       });
@@ -267,7 +271,6 @@ router.post('/register',
       return res.status(201).json({
         success: true,
         message: `Welcome to Sportika, ${name.split(' ')[0]}! Please verify your email.`,
-        otp, // sent for development verification modal
         data: {
           user: { ...user, addresses: [] },
           token,

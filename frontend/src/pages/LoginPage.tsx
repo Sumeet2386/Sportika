@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Eye, EyeOff, Mail, Lock, ArrowRight, Shield, Zap, AlertCircle,
-  CheckCircle, RefreshCw, KeyRound, Sparkles, ChevronLeft, User, Phone
+  CheckCircle, RefreshCw, Sparkles, ChevronLeft, User, Phone
 } from 'lucide-react';
 import { useAuthStore, useUIStore } from '../store';
 import { authAPI, checkAPIHealth } from '../api';
@@ -31,7 +31,6 @@ export default function LoginPage() {
   const [otpCode, setOtpCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [showNewPass, setShowNewPass] = useState(false);
-  const [previewOtp, setPreviewOtp] = useState('');
   const [countdown, setCountdown] = useState(0);
 
   // General states
@@ -84,7 +83,6 @@ export default function LoginPage() {
     setSuccessMsg('');
     setOtpStep(1);
     setOtpCode('');
-    setPreviewOtp('');
   };
 
   // 1. Password Login
@@ -177,8 +175,6 @@ export default function LoginPage() {
       const res = (await authAPI.sendOtp(otpEmail.trim().toLowerCase())) as any;
       if (res.success) {
         setOtpStep(2);
-        setPreviewOtp(res.code || '');
-        setOtpCode(res.code || '');
         setSuccessMsg(`Verification code sent to ${otpEmail}`);
         startTimer(30);
       } else {
@@ -233,8 +229,6 @@ export default function LoginPage() {
       const res = (await authAPI.forgotPassword(otpEmail.trim().toLowerCase())) as any;
       if (res.success) {
         setOtpStep(2);
-        setPreviewOtp(res.code || '');
-        setOtpCode(res.code || '');
         setSuccessMsg(res.message || 'Reset code sent to your email.');
         startTimer(30);
       } else {
@@ -289,8 +283,6 @@ export default function LoginPage() {
     try {
       const res = (await authAPI.sendOtp(otpEmail.trim().toLowerCase())) as any;
       if (res.success) {
-        setPreviewOtp(res.code || '');
-        setOtpCode(res.code || '');
         setSuccessMsg('A new verification code has been sent!');
         startTimer(30);
       }
@@ -697,46 +689,6 @@ export default function LoginPage() {
             >
               <CheckCircle size={18} style={{ flexShrink: 0 }} />
               <div>{successMsg}</div>
-            </div>
-          )}
-
-          {/* Preview OTP Helper (for instant seamless testing) */}
-          {previewOtp && (
-            <div
-              style={{
-                background: 'linear-gradient(135deg, #EFF6FF, #EEF2FF)',
-                border: '1.5px dashed #6366F1',
-                borderRadius: 12,
-                padding: '10px 14px',
-                marginBottom: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '0.82rem',
-                color: '#4338CA',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <KeyRound size={15} />
-                <span>Verification OTP:</span>
-                <strong style={{ letterSpacing: 2, fontSize: '1rem', color: '#1E1B4B' }}>{previewOtp}</strong>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOtpCode(previewOtp)}
-                style={{
-                  background: '#6366F1',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 6,
-                  padding: '4px 10px',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Auto Fill
-              </button>
             </div>
           )}
 

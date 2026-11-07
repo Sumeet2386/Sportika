@@ -167,9 +167,6 @@ export const authAPI = {
     users.push(newUser);
     saveStoredUsers(users);
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    sessionStorage.setItem(`otp_${cleanEmail}`, otp);
-
     const token = `jwt_token_${userId}`;
     const refreshToken = `jwt_refresh_${userId}`;
     const { password: _, ...safeUser } = newUser;
@@ -177,7 +174,6 @@ export const authAPI = {
     return {
       success: true,
       message: `Welcome to Sportika, ${cleanName.split(' ')[0]}! Account created successfully.`,
-      otp,
       data: {
         user: safeUser,
         token,
@@ -242,14 +238,13 @@ export const authAPI = {
         body: JSON.stringify({ email: cleanEmail }),
       });
       if (res && res.success) return res;
-    } catch (_) {}
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to send verification code.');
+    }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    sessionStorage.setItem(`otp_${cleanEmail}`, code);
     return {
       success: true,
       message: `Verification code sent to ${cleanEmail}`,
-      code,
     };
   },
 
@@ -307,20 +302,13 @@ export const authAPI = {
         body: JSON.stringify({ email: cleanEmail }),
       });
       if (res && res.success) return res;
-    } catch (_) {}
-
-    const users = getStoredUsers();
-    const user = users.find((u) => u.email === cleanEmail);
-    if (!user && cleanEmail !== 'admin@sportika.in') {
-      throw new Error('No account found with this email address. Please register.');
+    } catch (err: any) {
+      throw new Error(err.message || 'Could not process password reset request.');
     }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    sessionStorage.setItem(`reset_otp_${cleanEmail}`, code);
     return {
       success: true,
       message: `A 6-digit password reset code has been sent to ${cleanEmail}`,
-      code,
     };
   },
 
