@@ -90,10 +90,56 @@ db.exec(`
     UNIQUE(user_id, product_id, size, color)
   );
 
+  CREATE TABLE IF NOT EXISTS products (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    brand TEXT DEFAULT 'Sportika',
+    description TEXT,
+    category TEXT NOT NULL,
+    subcategory TEXT NOT NULL,
+    sport TEXT DEFAULT 'Training',
+    price REAL NOT NULL,
+    original_price REAL NOT NULL,
+    discount INTEGER DEFAULT 0,
+    rating REAL DEFAULT 4.8,
+    review_count INTEGER DEFAULT 0,
+    stock INTEGER DEFAULT 50,
+    sold INTEGER DEFAULT 0,
+    images TEXT NOT NULL DEFAULT '[]',
+    sizes TEXT NOT NULL DEFAULT '[]',
+    colors TEXT NOT NULL DEFAULT '[]',
+    tags TEXT NOT NULL DEFAULT '[]',
+    featured INTEGER DEFAULT 0,
+    new_arrival INTEGER DEFAULT 0,
+    bestseller INTEGER DEFAULT 0,
+    active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS coupons (
+    id TEXT PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('percentage', 'fixed')),
+    value REAL NOT NULL,
+    min_order REAL DEFAULT 0,
+    max_discount REAL,
+    usage_limit INTEGER DEFAULT 1000,
+    used_count INTEGER DEFAULT 0,
+    expires_at TEXT,
+    active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
   CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
   CREATE INDEX IF NOT EXISTS idx_wishlists_user_id ON wishlists(user_id);
   CREATE INDEX IF NOT EXISTS idx_cart_items_user_id ON cart_items(user_id);
+  CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+  CREATE INDEX IF NOT EXISTS idx_products_subcategory ON products(subcategory);
+  CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
+  CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
 `);
 
 console.log('✅ SQLite database initialized at:', DB_PATH);

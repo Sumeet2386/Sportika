@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import dotenv from 'dotenv';
-import { bootstrapAdmin } from './config/bootstrap';
+import { bootstrapAdmin, bootstrapCatalog } from './config/bootstrap';
 
 dotenv.config();
 
@@ -114,6 +114,7 @@ app.listen(PORT, async () => {
   console.log(`📌 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health: http://localhost:${PORT}/api/health\n`);
   await bootstrapAdmin();
+  bootstrapCatalog();
 });
 
 export default app;
